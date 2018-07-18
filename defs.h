@@ -4716,6 +4716,11 @@ struct task_mem_usage {
 	ulong pgd_addr;
 };
 
+struct callback_func_arg {
+	int (*callback)(ulong addr, void *arg);
+	void *arg;
+};
+
 /*
  *  Global data (global_data.c) 
  */
@@ -4952,7 +4957,7 @@ struct radix_tree_ops {
 };
 int do_radix_tree_traverse(ulong ptr, int is_root, struct radix_tree_ops *ops);
 int do_rdtree(struct tree_data *);
-int do_rbtree(struct tree_data *);
+int do_rbtree(struct tree_data *td, struct callback_func_arg *callback);
 int retrieve_list(ulong *, int);
 long power(long, int);
 long long ll_power(long long, long long);

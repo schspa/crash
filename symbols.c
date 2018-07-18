@@ -4330,7 +4330,6 @@ symbol_query(char *s, char *print_pad, struct syment **spp)
 	return(cnt);
 }
 
-
 /*
  *  Return the syment of a symbol.
  */
@@ -7772,7 +7771,7 @@ next_item:
 		sprintf(lookfor4, "*%s[", s);
 		sprintf(lookfor5, " %s :", s);
 
-                while (fgets(buf, BUFSIZE, pc->tmpfile)) {
+		while (fgets(buf, BUFSIZE, pc->tmpfile)) {
 			indent = count_leading_spaces(buf);
 
 			switch (indent)
