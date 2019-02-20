@@ -127,6 +127,8 @@ static void get_core_regs_from_dump_log(char *path)
 				ptreg[cpu].sp = value;
 			} else if (!strncmp(pname, "lr", 2)) {
 				ptreg[cpu].regs[30] = value;
+			} else if (!strncmp(pname, "pstate", strlen("pstate") + 1)) {
+				ptreg[cpu].pstate = value;
 			}
 			else if (*pname == 'x' || *pname == 'X'){
 				pname++;

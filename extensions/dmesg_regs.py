@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python
 
 import sys,os
 import re
@@ -59,7 +59,7 @@ def parse_sp_regs(msg, regs):
         groups = searchObj.groups()
         #print(groups)
         regs.set(groups[0], int(groups[1], 16))
-        ##print('remaining \"' + groups[4] + '\"')
+        ##print('get ' + groups[0] + ': '+ groups[1])
         searchObj=re.search(pc_lr_pattern, groups[2])
         if searchObj != None:
             if len(groups) > 2:
