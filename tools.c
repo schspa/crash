@@ -29,7 +29,7 @@ struct hq_entry;
 static void dealloc_hq_entry(struct hq_entry *);
 static void show_options(void);
 static void dump_struct_members(struct list_data *, int, ulong);
-static void rbtree_iteration(ulong, struct tree_data *, char *);
+static void rbtree_iteration(ulong, struct tree_data *, char *, struct callback_func_arg *callback);
 static void dump_struct_members_for_tree(struct tree_data *, int, ulong);
 
 struct req_entry {
@@ -4533,7 +4533,7 @@ next_arg:
 	else if (type_flag & XARRAY_REQUEST)
 		do_xatree(td);
 	else
-		do_rbtree(td);
+		do_rbtree(td, NULL);
 	hq_close();
 
         if (td->structname_args)
@@ -4880,7 +4880,6 @@ int do_rdtree(struct tree_data *td)
 	return 0;
 }
 
-
 static void do_xarray_entry(ulong node, ulong slot, const char *path,
 			    ulong index, void *private)
 {
@@ -4953,8 +4952,7 @@ int do_xatree(struct tree_data *td)
 	return 0;
 }
 
-int
-do_rbtree(struct tree_data *td)
+int do_rbtree(struct tree_data *td, struct callback_func_arg *callback)
 {
 	ulong start;
 	char pos[BUFSIZE];
@@ -4972,13 +4970,13 @@ do_rbtree(struct tree_data *td)
 		readmem(td->start + OFFSET(rb_root_rb_node), KVADDR,
 			&start, sizeof(void *), "rb_root rb_node", FAULT_ON_ERROR);
 
-	rbtree_iteration(start, td, pos);
+	rbtree_iteration(start, td, pos, callback);
 
 	return td->count;
 }
-
+// tree -t rbtree -o ion_handle.node -s ion_handle.buffer 0xffffffe40d0da920
 void
-rbtree_iteration(ulong node_p, struct tree_data *td, char *pos)
+rbtree_iteration(ulong node_p, struct tree_data *td, char *pos, struct callback_func_arg *callback)
 {
 	int i;
 	uint print_radix;
@@ -5011,7 +5009,7 @@ rbtree_iteration(ulong node_p, struct tree_data *td, char *pos)
 		if (readmem(new_p+OFFSET(rb_node_rb_left), KVADDR, &test_p,
 			sizeof(void *), "rb_node rb_left", RETURN_ON_ERROR|QUIET)) {
 			sprintf(new_pos, "%s/l", pos);
-			rbtree_iteration(new_p, td, new_pos);
+			rbtree_iteration(new_p, td, new_pos, callback);
 		} else
 			error(INFO, "rb_node: %lx: corrupted rb_left pointer: %lx\n",
 					node_p, new_p);
@@ -5019,8 +5017,13 @@ rbtree_iteration(ulong node_p, struct tree_data *td, char *pos)
 
 	struct_p = node_p - td->node_member_offset;
 
-	if (td->flags & VERBOSE)
+	if (callback != NULL) {
+		(*callback).callback(struct_p, (*callback).arg);
+	}
+
+	if (td->flags & VERBOSE) {
 		fprintf(fp, "%lx\n", struct_p);
+	}
 	
 	if (td->flags & TREE_POSITION_DISPLAY)
 		fprintf(fp, "  position: %s\n", pos);
@@ -5056,7 +5059,7 @@ rbtree_iteration(ulong node_p, struct tree_data *td, char *pos)
 		if (readmem(new_p+OFFSET(rb_node_rb_left), KVADDR, &test_p,
 			sizeof(void *), "rb_node rb_left", RETURN_ON_ERROR|QUIET)) {
 			sprintf(new_pos, "%s/l", pos);
-			rbtree_iteration(new_p, td, new_pos);
+			rbtree_iteration(new_p, td, new_pos, callback);
 		} else
 			error(INFO, "rb_node: %lx: corrupted rb_left pointer: %lx\n",
 					node_p, new_p);
@@ -5067,7 +5070,7 @@ rbtree_iteration(ulong node_p, struct tree_data *td, char *pos)
 		if (readmem(new_p+OFFSET(rb_node_rb_left), KVADDR, &test_p,
 			sizeof(void *), "rb_node rb_left", RETURN_ON_ERROR|QUIET)) {
 			sprintf(new_pos, "%s/r", pos);
-			rbtree_iteration(new_p, td, new_pos);
+			rbtree_iteration(new_p, td, new_pos, callback);
 		} else
 			error(INFO, "rb_node: %lx: corrupted rb_right pointer: %lx\n",
 					node_p, new_p);

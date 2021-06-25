@@ -3357,7 +3357,7 @@ arm64_translate_pte(ulong pte, void *physaddr, ulonglong unused)
 	char ptebuf[BUFSIZE];
 	char physbuf[BUFSIZE];
         char *arglist[MAXARGS];
-	int page_present;
+	ulong page_present;
 
 	paddr = PTE_TO_PHYS(pte);
        	page_present = pte & (PTE_VALID | machdep->machspec->PTE_PROT_NONE);

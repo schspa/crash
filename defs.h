@@ -4915,6 +4915,11 @@ struct task_mem_usage {
 	ulong pgd_addr;
 };
 
+struct callback_func_arg {
+	int (*callback)(ulong addr, void *arg);
+	void *arg;
+};
+
 /*
  *  Global data (global_data.c) 
  */
@@ -5164,7 +5169,7 @@ struct xarray_ops {
 };
 int do_xarray_traverse(ulong ptr, int is_root, struct xarray_ops *ops);
 int do_rdtree(struct tree_data *);
-int do_rbtree(struct tree_data *);
+int do_rbtree(struct tree_data *td, struct callback_func_arg *callback);
 int do_xatree(struct tree_data *);
 int retrieve_list(ulong *, int);
 long power(long, int);
